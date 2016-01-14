@@ -21,8 +21,24 @@ public class Client implements INetworkManager {
         this.host = host;
         this.port = port;
         this.server = new Socket(host, port);
+
+        Thread updateThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    Client.this.update();
+                }
+            }
+        });
+
+        updateThread.start();
     }
 
+    @Override
+    public void update() {
+    }
+
+    @Override
     public void listen() {
         try {
             InputStream in = server.getInputStream();
@@ -32,6 +48,7 @@ public class Client implements INetworkManager {
             packet.handle(null, Side.CLIENT, server, this);
         } catch (IOException e) {
             e.printStackTrace();
+            System.exit(0);
         }
     }
 
@@ -48,10 +65,15 @@ public class Client implements INetworkManager {
         } catch (IOException e) {
             System.err.println("Failed to send packet: " + packet);
             e.printStackTrace();
+            System.exit(0);
         }
     }
 
     @Override
     public void sendPacketToClient(IPacket packet, Socket client) {
+    }
+
+    @Override
+    public void sendPacketToAllClients(IPacket packet) {
     }
 }

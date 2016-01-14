@@ -13,26 +13,41 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Server implements INetworkManager {
     private int port;
     private ServerSocket serverSocket;
-    private List<Socket> aliveClients = new ArrayList<>();
+    private volatile List<Socket> aliveClients = new ArrayList<>();
+    private volatile boolean clientConnecting;
 
     public Server(int port) throws IOException {
         this.port = port;
         this.serverSocket = new ServerSocket(port);
+
+        Thread updateThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    Server.this.update();
+                }
+            }
+        });
+
+        updateThread.start();
     }
 
     public void waitForConnection() throws IOException {
         Socket client = this.serverSocket.accept();
 
+        clientConnecting = true;
+
         if (!aliveClients.contains(client)) {
+            System.out.println(client.getInetAddress() + ":" + client.getPort() + " has connected!");
             aliveClients.add(client);
         }
+
+        clientConnecting = false;
     }
 
     @Override
@@ -56,17 +71,34 @@ public class Server implements INetworkManager {
     }
 
     @Override
+    public void sendPacketToAllClients(IPacket packet) {
+        for (Socket client : aliveClients) {
+            sendPacketToClient(packet, client);
+        }
+    }
+
+    @Override
     public void sendPacketToServer(IPacket packet) {
     }
 
+    @Override
+    public void update() {
+    }
+
     public void listen() {
+        while (clientConnecting);
+
+        List<Socket> aliveClients = new ArrayList<>(this.aliveClients);
+
         for (Socket client : aliveClients) {
             try {
                 InputStream in = client.getInputStream();
-                byte[] data = IOUtils.toByteArray(in);
-                IPacket packet = NetworkRegistry.constructFromId(NetworkRegistry.getId(data));
-                packet.decode(data);
-                packet.handle(null, Side.SERVER, client, this);
+                if (in.available() != 0) {
+                    byte[] data = IOUtils.toByteArray(in);
+                    IPacket packet = NetworkRegistry.constructFromId(NetworkRegistry.getId(data));
+                    packet.decode(data);
+                    packet.handle(null, Side.SERVER, client, Server.this);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }

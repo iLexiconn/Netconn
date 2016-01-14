@@ -4,16 +4,17 @@ import net.ilexiconn.packet.IPacket;
 import net.ilexiconn.packet.IPacketHandler;
 
 public enum EnumTest implements IPacketHandler {
-    TEST {
+    CHAT_MESSAGE
+            {
         @Override
         public IPacket createPacket() {
-            return new PacketTestData();
+            return new PacketSendMessage();
         }
 
         @Override
         public Class<? extends IPacket> getPacketClass()
         {
-            return PacketTestData.class;
+            return PacketSendMessage.class;
         }
     };
 
