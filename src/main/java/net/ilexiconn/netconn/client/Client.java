@@ -1,12 +1,11 @@
-package net.ilexiconn.packet.client;
+package net.ilexiconn.netconn.client;
 
-import net.ilexiconn.packet.*;
+import net.ilexiconn.netconn.*;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.nio.ByteBuffer;
 
 public class Client implements INetworkManager {
     private String host;
@@ -40,9 +39,11 @@ public class Client implements INetworkManager {
         try {
             InputStream in = server.getInputStream();
             byte[] data = IOUtils.toByteArray(in);
-            IPacket packet = NetworkRegistry.constructFromId(NetworkRegistry.getId(data));
-            packet.decode(new ByteHelper(data));
-            packet.handle(new ByteHelper(data), Side.CLIENT, server, this);
+            IPacket packet = NetconnRegistry.constructFromID(NetconnRegistry.getIDFromBytes(data));
+            if (packet != null) {
+                packet.decode(new ByteBuffer(data));
+                packet.handleClient(this);
+            }
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(0);
@@ -53,12 +54,12 @@ public class Client implements INetworkManager {
     public void sendPacketToServer(IPacket packet) {
         try {
             OutputStream out = server.getOutputStream();
-            byte[] idBytes = ByteBuffer.allocate(4).putInt(NetworkRegistry.getHandlerForPacket(packet.getClass()).getID()).array();
-            byte[] bytes = packet.encode(new ByteHelper());
+            byte[] idBytes = java.nio.ByteBuffer.allocate(4).putInt(NetconnRegistry.getIDFromPacket(packet.getClass())).array();
+            byte[] bytes = packet.encode(new ByteBuffer());
             System.arraycopy(idBytes, 0, bytes, 0, idBytes.length);
             out.write(bytes);
         } catch (IOException e) {
-            System.err.println("Failed to send packet: " + packet);
+            System.err.println("Failed to send packet with ID " + NetconnRegistry.getIDFromPacket(packet.getClass()));
             e.printStackTrace();
             System.exit(0);
         }

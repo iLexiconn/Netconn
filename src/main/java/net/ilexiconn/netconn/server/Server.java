@@ -1,13 +1,12 @@
-package net.ilexiconn.packet.server;
+package net.ilexiconn.netconn.server;
 
-import net.ilexiconn.packet.*;
+import net.ilexiconn.netconn.*;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,12 +49,12 @@ public class Server implements INetworkManager {
     public void sendPacketToClient(IPacket packet, Socket client) {
         try {
             OutputStream out = client.getOutputStream();
-            byte[] idBytes = ByteBuffer.allocate(4).putInt(NetworkRegistry.getHandlerForPacket(packet.getClass()).getID()).array();
-            byte[] bytes = packet.encode(new ByteHelper());
+            byte[] idBytes = java.nio.ByteBuffer.allocate(4).putInt(NetconnRegistry.getIDFromPacket(packet.getClass())).array();
+            byte[] bytes = packet.encode(new ByteBuffer());
             System.arraycopy(idBytes, 0, bytes, 0, idBytes.length);
             out.write(bytes);
         } catch (IOException e) {
-            System.err.println("Failed to send packet: " + packet);
+            System.err.println("Failed to send packet with ID " + NetconnRegistry.getIDFromPacket(packet.getClass()));
             e.printStackTrace();
         }
     }
@@ -78,7 +77,7 @@ public class Server implements INetworkManager {
     }
 
     public void listen() {
-        while (clientConnecting);
+        while (clientConnecting) ;
 
         List<Socket> aliveClients = new ArrayList<>(this.aliveClients);
 
@@ -87,9 +86,11 @@ public class Server implements INetworkManager {
                 InputStream in = client.getInputStream();
                 if (in.available() != 0) {
                     byte[] data = IOUtils.toByteArray(in);
-                    IPacket packet = NetworkRegistry.constructFromId(NetworkRegistry.getId(data));
-                    packet.decode(new ByteHelper(data));
-                    packet.handle(null, Side.SERVER, client, Server.this);
+                    IPacket packet = NetconnRegistry.constructFromID(NetconnRegistry.getIDFromBytes(data));
+                    if (packet != null) {
+                        packet.decode(new ByteBuffer(data));
+                        packet.handleServer(Server.this);
+                    }
                 }
             } catch (IOException e) {
                 e.printStackTrace();

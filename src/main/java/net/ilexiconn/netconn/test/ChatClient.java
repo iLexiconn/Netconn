@@ -1,7 +1,7 @@
-package net.ilexiconn.packet.test;
+package net.ilexiconn.netconn.test;
 
-import net.ilexiconn.packet.NetworkRegistry;
-import net.ilexiconn.packet.client.Client;
+import net.ilexiconn.netconn.NetconnRegistry;
+import net.ilexiconn.netconn.client.Client;
 
 import java.io.IOException;
 import java.util.Scanner;
@@ -17,7 +17,7 @@ public class ChatClient {
             host = args[1];
             port = Integer.parseInt(args[2]);
 
-            NetworkRegistry.registerPacket(EnumTest.CHAT_MESSAGE);
+            NetconnRegistry.registerPacket(0, PacketSendMessage.class);
 
             final Client client = new Client(host, port);
 

@@ -1,18 +1,15 @@
-package net.ilexiconn.packet;
+package net.ilexiconn.netconn;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-
-public class ByteHelper {
+public class ByteBuffer {
     private byte[] bytes;
     private int index;
 
-    public ByteHelper() {
+    public ByteBuffer() {
         this.bytes = new byte[16384];
         resetIndex();
     }
 
-    public ByteHelper(byte[] bytes) {
+    public ByteBuffer(byte[] bytes) {
         this.bytes = bytes;
         resetIndex();
     }
@@ -29,7 +26,7 @@ public class ByteHelper {
     }
 
     public void writeInteger(int i) {
-        writeBytes(ByteBuffer.allocate(4).putInt(i).array());
+        writeBytes(java.nio.ByteBuffer.allocate(4).putInt(i).array());
     }
 
     public void writeString(String s) {
@@ -56,7 +53,7 @@ public class ByteHelper {
     }
 
     public int readInteger() {
-        return ByteBuffer.wrap(readBytes(4)).getInt();
+        return java.nio.ByteBuffer.wrap(readBytes(4)).getInt();
     }
 
     public String readString() {

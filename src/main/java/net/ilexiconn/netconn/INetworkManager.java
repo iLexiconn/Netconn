@@ -1,4 +1,4 @@
-package net.ilexiconn.packet;
+package net.ilexiconn.netconn;
 
 import java.net.Socket;
 
