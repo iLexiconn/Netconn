@@ -5,8 +5,7 @@ import net.ilexiconn.packet.server.Server;
 
 import java.io.IOException;
 
-public class ChatServer
-{
+public class ChatServer {
     public static void main(String[] args) throws IOException, InterruptedException {
         if (args.length > 0) {
             NetworkRegistry.registerPacket(EnumTest.CHAT_MESSAGE);

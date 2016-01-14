@@ -21,8 +21,7 @@ public class PacketSendMessage implements IPacket {
     }
 
     @Override
-    public byte[] encode() {
-        ByteHelper byteHelper = new ByteHelper();
+    public byte[] encode(ByteHelper byteHelper) {
         byteHelper.writeString(sender);
         byteHelper.writeString(message);
 
@@ -30,10 +29,9 @@ public class PacketSendMessage implements IPacket {
     }
 
     @Override
-    public void decode(byte[] data) {
-        ByteHelper helper = new ByteHelper(data);
-        this.sender = helper.readString();
-        this.message = helper.readString();
+    public void decode(ByteHelper byteHelper) {
+        this.sender = byteHelper.readString();
+        this.message = byteHelper.readString();
     }
 
     @Override

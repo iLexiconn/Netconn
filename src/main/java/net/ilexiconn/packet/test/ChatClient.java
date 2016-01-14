@@ -6,8 +6,7 @@ import net.ilexiconn.packet.client.Client;
 import java.io.IOException;
 import java.util.Scanner;
 
-public class ChatClient
-{
+public class ChatClient {
     public static String username;
     public static String host;
     public static int port;

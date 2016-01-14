@@ -8,12 +8,12 @@ public class NetworkRegistry {
     private static Map<Integer, IPacketHandler> packetHandlerMap = new HashMap<>();
 
     public static void registerPacket(IPacketHandler packetHandler) {
-        packetHandlerMap.put(packetHandler.getId(), packetHandler);
+        packetHandlerMap.put(packetHandler.getID(), packetHandler);
     }
 
     public static void registerPackets(IPacketHandler... packetHandlers) {
         for (IPacketHandler packetHandler : packetHandlers) {
-            packetHandlerMap.put(packetHandler.getId(), packetHandler);
+            packetHandlerMap.put(packetHandler.getID(), packetHandler);
         }
     }
 
@@ -22,13 +22,13 @@ public class NetworkRegistry {
     }
 
     public static int getId(byte[] data) {
-        return ByteBuffer.wrap(new byte[] { data[0], data[1], data[2], data[3] }).getInt();
+        return ByteBuffer.wrap(new byte[]{data[0], data[1], data[2], data[3]}).getInt();
     }
 
-    public static IPacketHandler getHandlerForPacket(IPacket packet) {
+    public static IPacketHandler getHandlerForPacket(Class<? extends IPacket> packet) {
         for (Map.Entry<Integer, IPacketHandler> entry : packetHandlerMap.entrySet()) {
             IPacketHandler handler = entry.getValue();
-            if (handler.getPacketClass().equals(packet.getClass())) {
+            if (handler.getPacketClass().equals(packet)) {
                 return handler;
             }
         }

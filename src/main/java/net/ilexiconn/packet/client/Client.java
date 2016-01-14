@@ -1,10 +1,6 @@
 package net.ilexiconn.packet.client;
 
-import net.ilexiconn.packet.INetworkManager;
-import net.ilexiconn.packet.IOUtils;
-import net.ilexiconn.packet.IPacket;
-import net.ilexiconn.packet.NetworkRegistry;
-import net.ilexiconn.packet.Side;
+import net.ilexiconn.packet.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,6 +32,7 @@ public class Client implements INetworkManager {
 
     @Override
     public void update() {
+
     }
 
     @Override
@@ -44,7 +41,7 @@ public class Client implements INetworkManager {
             InputStream in = server.getInputStream();
             byte[] data = IOUtils.toByteArray(in);
             IPacket packet = NetworkRegistry.constructFromId(NetworkRegistry.getId(data));
-            packet.decode(data);
+            packet.decode(new ByteHelper(data));
             packet.handle(null, Side.CLIENT, server, this);
         } catch (IOException e) {
             e.printStackTrace();
@@ -56,11 +53,9 @@ public class Client implements INetworkManager {
     public void sendPacketToServer(IPacket packet) {
         try {
             OutputStream out = server.getOutputStream();
-            byte[] idBytes = ByteBuffer.allocate(4).putInt(NetworkRegistry.getHandlerForPacket(packet).getId()).array();
-            byte[] bytes = packet.encode();
-            for (int i = 0; i < idBytes.length; i++) {
-                bytes[i] = idBytes[i];
-            }
+            byte[] idBytes = ByteBuffer.allocate(4).putInt(NetworkRegistry.getHandlerForPacket(packet.getClass()).getID()).array();
+            byte[] bytes = packet.encode(new ByteHelper());
+            System.arraycopy(idBytes, 0, bytes, 0, idBytes.length);
             out.write(bytes);
         } catch (IOException e) {
             System.err.println("Failed to send packet: " + packet);
@@ -71,9 +66,11 @@ public class Client implements INetworkManager {
 
     @Override
     public void sendPacketToClient(IPacket packet, Socket client) {
+
     }
 
     @Override
     public void sendPacketToAllClients(IPacket packet) {
+
     }
 }

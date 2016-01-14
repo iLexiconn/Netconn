@@ -1,10 +1,6 @@
 package net.ilexiconn.packet.server;
 
-import net.ilexiconn.packet.INetworkManager;
-import net.ilexiconn.packet.IOUtils;
-import net.ilexiconn.packet.IPacket;
-import net.ilexiconn.packet.NetworkRegistry;
-import net.ilexiconn.packet.Side;
+import net.ilexiconn.packet.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,15 +50,9 @@ public class Server implements INetworkManager {
     public void sendPacketToClient(IPacket packet, Socket client) {
         try {
             OutputStream out = client.getOutputStream();
-
-            byte[] idBytes = ByteBuffer.allocate(4).putInt(NetworkRegistry.getHandlerForPacket(packet).getId()).array();
-
-            byte[] bytes = packet.encode();
-
-            for (int i = 0; i < idBytes.length; i++) {
-                bytes[i] = idBytes[i];
-            }
-
+            byte[] idBytes = ByteBuffer.allocate(4).putInt(NetworkRegistry.getHandlerForPacket(packet.getClass()).getID()).array();
+            byte[] bytes = packet.encode(new ByteHelper());
+            System.arraycopy(idBytes, 0, bytes, 0, idBytes.length);
             out.write(bytes);
         } catch (IOException e) {
             System.err.println("Failed to send packet: " + packet);
@@ -79,10 +69,12 @@ public class Server implements INetworkManager {
 
     @Override
     public void sendPacketToServer(IPacket packet) {
+
     }
 
     @Override
     public void update() {
+
     }
 
     public void listen() {
@@ -96,7 +88,7 @@ public class Server implements INetworkManager {
                 if (in.available() != 0) {
                     byte[] data = IOUtils.toByteArray(in);
                     IPacket packet = NetworkRegistry.constructFromId(NetworkRegistry.getId(data));
-                    packet.decode(data);
+                    packet.decode(new ByteHelper(data));
                     packet.handle(null, Side.SERVER, client, Server.this);
                 }
             } catch (IOException e) {

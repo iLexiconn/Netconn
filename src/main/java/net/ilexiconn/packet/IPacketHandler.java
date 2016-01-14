@@ -1,9 +1,9 @@
 package net.ilexiconn.packet;
 
-public interface IPacketHandler {
-    IPacket createPacket();
-    
-    Class<? extends IPacket> getPacketClass();
+public interface IPacketHandler<T extends IPacket> {
+    T createPacket();
 
-    int getId();
+    Class<T> getPacketClass();
+
+    int getID();
 }
