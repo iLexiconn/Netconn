@@ -42,7 +42,7 @@ public class Client implements INetworkManager {
             byte[] data = IOUtils.toByteArray(in);
             IPacket packet = NetworkRegistry.constructFromId(NetworkRegistry.getId(data));
             packet.decode(new ByteHelper(data));
-            packet.handle(null, Side.CLIENT, server, this);
+            packet.handle(new ByteHelper(data), Side.CLIENT, server, this);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(0);
