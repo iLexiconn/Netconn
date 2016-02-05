@@ -65,6 +65,10 @@ public class ByteBuffer {
         index = 4; //First 4 bytes are id
     }
 
+    public void incrementIndex(int amount) {
+        index += amount;
+    }
+
     public byte[] toBytes() {
         return bytes;
     }
