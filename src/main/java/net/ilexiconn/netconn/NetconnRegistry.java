@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class NetconnRegistry {
-    private static Map<Integer, Class<? extends IPacket>> packetHandlerMap = new HashMap<>();
+    private static Map<Integer, Class<? extends IPacket>> packetHandlerMap = new HashMap<Integer, Class<? extends IPacket>>();
 
     public static void registerPacket(int id, Class<? extends IPacket> packet) {
         packetHandlerMap.put(id, packet);

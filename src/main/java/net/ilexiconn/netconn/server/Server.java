@@ -13,7 +13,7 @@ import java.util.List;
 public class Server implements INetworkManager {
     private int port;
     private ServerSocket serverSocket;
-    private volatile List<Socket> aliveClients = new ArrayList<>();
+    private volatile List<Socket> aliveClients = new ArrayList<Socket>();
     private volatile boolean clientConnecting;
 
     public Server(int port) throws IOException {
@@ -79,7 +79,7 @@ public class Server implements INetworkManager {
     public void listen() {
         while (clientConnecting) ;
 
-        List<Socket> aliveClients = new ArrayList<>(this.aliveClients);
+        List<Socket> aliveClients = new ArrayList<Socket>(this.aliveClients);
 
         for (Socket client : aliveClients) {
             try {
