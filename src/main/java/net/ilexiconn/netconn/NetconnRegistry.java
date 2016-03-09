@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class NetconnRegistry {
+    public static final String VERSION = "0.1.0";
+
     private static Map<Integer, Class<? extends IPacket>> packetHandlerMap = new HashMap<Integer, Class<? extends IPacket>>();
 
     public static void registerPacket(int id, Class<? extends IPacket> packet) {

@@ -52,7 +52,9 @@ public class Server implements INetworkManager {
                     timer.purge();
                 }
 
-                while (clientConnecting);
+                while (clientConnecting) {
+                    ;
+                }
 
                 if (!deadClients.isEmpty()) {
                     clientConnecting = true;
@@ -154,7 +156,9 @@ public class Server implements INetworkManager {
     }
 
     public void listen() {
-        while (clientConnecting);
+        while (clientConnecting) {
+            ;
+        }
 
         for (Socket client : this.aliveClients) {
             if (client != null) {
