@@ -50,7 +50,9 @@ public class Server implements INetworkManager {
         try {
             OutputStream out = client.getOutputStream();
             byte[] idBytes = java.nio.ByteBuffer.allocate(4).putInt(NetconnRegistry.getIDFromPacket(packet.getClass())).array();
-            byte[] bytes = packet.encode(new ByteBuffer());
+            ByteBuffer byteBuffer = new ByteBuffer();
+            packet.encode(byteBuffer);
+            byte[] bytes = byteBuffer.toBytes();
             System.arraycopy(idBytes, 0, bytes, 0, idBytes.length);
             out.write(bytes);
         } catch (IOException e) {

@@ -1,7 +1,7 @@
 package net.ilexiconn.netconn;
 
 public interface IPacket {
-    byte[] encode(ByteBuffer byteBuffer);
+    void encode(ByteBuffer byteBuffer);
 
     void decode(ByteBuffer byteBuffer);
 

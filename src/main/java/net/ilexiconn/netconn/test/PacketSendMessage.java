@@ -18,11 +18,9 @@ public class PacketSendMessage implements IPacket {
     }
 
     @Override
-    public byte[] encode(ByteBuffer byteBuffer) {
+    public void encode(ByteBuffer byteBuffer) {
         byteBuffer.writeString(sender);
         byteBuffer.writeString(message);
-
-        return byteBuffer.toBytes();
     }
 
     @Override
