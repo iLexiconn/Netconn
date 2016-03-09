@@ -46,7 +46,6 @@ public class Client implements INetworkManager {
             }
         } catch (IOException e) {
             e.printStackTrace();
-            System.exit(0);
         }
     }
 
@@ -63,7 +62,6 @@ public class Client implements INetworkManager {
         } catch (IOException e) {
             System.err.println("Failed to send packet with ID " + NetconnRegistry.getIDFromPacket(packet.getClass()));
             e.printStackTrace();
-            System.exit(0);
         }
     }
 
