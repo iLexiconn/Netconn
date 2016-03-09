@@ -1,9 +1,11 @@
 package net.ilexiconn.netconn.test;
 
 import net.ilexiconn.netconn.NetconnRegistry;
+import net.ilexiconn.netconn.server.IServerListener;
 import net.ilexiconn.netconn.server.Server;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.util.Scanner;
 
 public class ChatServer {
@@ -14,6 +16,18 @@ public class ChatServer {
             int port = Integer.parseInt(args[0]);
 
             final Server server = new Server(port);
+
+            server.addListener(new IServerListener() {
+                @Override
+                public void onClientConnected(Server server, Socket client) {
+                    System.out.println(client.getInetAddress() + ":" + client.getPort() + " has connected!");
+                }
+
+                @Override
+                public void onClientDisconnected(Server server, Socket client) {
+                    System.out.println(client.getInetAddress() + ":" + client.getPort() + " has disconnected!");
+                }
+            });
 
             System.out.println("Launched server on port: " + port);
 
@@ -41,6 +55,11 @@ public class ChatServer {
 
             while (in.hasNextLine()) {
                 String message = in.nextLine();
+                if (message.equals("/stop")) {
+                    server.stop();
+                    System.gc();
+                    System.exit(0);
+                }
                 System.out.println("<SERVER> " + message);
                 server.sendPacketToAllClients(new PacketSendMessage("SERVER", message));
             }

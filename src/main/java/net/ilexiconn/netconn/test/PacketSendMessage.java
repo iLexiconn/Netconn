@@ -4,6 +4,8 @@ import net.ilexiconn.netconn.ByteBuffer;
 import net.ilexiconn.netconn.INetworkManager;
 import net.ilexiconn.netconn.IPacket;
 
+import java.net.Socket;
+
 public class PacketSendMessage implements IPacket {
     private String sender;
     private String message;
@@ -30,13 +32,13 @@ public class PacketSendMessage implements IPacket {
     }
 
     @Override
-    public void handleServer(INetworkManager networkManager) {
-        System.out.println("<" + sender + "> " + message);
+    public void handleServer(Socket sender, INetworkManager networkManager) {
+        System.out.println("<" + this.sender + "> " + message);
         networkManager.sendPacketToAllClients(this);
     }
 
     @Override
-    public void handleClient(INetworkManager networkManager) {
+    public void handleClient(Socket server, INetworkManager networkManager) {
         System.out.println("<" + sender + "> " + message);
     }
 }
