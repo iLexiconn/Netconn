@@ -19,14 +19,14 @@ public class PacketSendMessage implements IPacket {
 
     @Override
     public void encode(ByteBuffer byteBuffer) {
-        byteBuffer.writeString(sender);
-        byteBuffer.writeString(message);
+        byteBuffer.writeStringShort(sender);
+        byteBuffer.writeStringShort(message);
     }
 
     @Override
     public void decode(ByteBuffer byteBuffer) {
-        this.sender = byteBuffer.readString();
-        this.message = byteBuffer.readString();
+        this.sender = byteBuffer.readStringShort();
+        this.message = byteBuffer.readStringShort();
     }
 
     @Override

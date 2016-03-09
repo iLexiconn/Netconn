@@ -29,11 +29,36 @@ public class ByteBuffer {
         writeBytes(java.nio.ByteBuffer.allocate(4).putInt(i).array());
     }
 
-    public void writeString(String s) {
-        byte[] bytes = s.getBytes();
+    public void writeShort(short s) {
+        writeBytes(java.nio.ByteBuffer.allocate(2).putShort(s).array());
+    }
 
-        writeInteger(bytes.length);
-        writeBytes(bytes);
+    public void writeDouble(double d) {
+        writeBytes(java.nio.ByteBuffer.allocate(8).putDouble(d).array());
+    }
+
+    public void writeFloat(float f) {
+        writeBytes(java.nio.ByteBuffer.allocate(4).putFloat(f).array());
+    }
+
+    public void writeLong(long l) {
+        writeBytes(java.nio.ByteBuffer.allocate(8).putLong(l).array());
+    }
+
+    public void writeStringByte(String s) {
+        for (char c : s.toCharArray()) {
+            writeByte((byte) c);
+        }
+
+        writeByte((byte) 0);
+    }
+
+    public void writeStringShort(String s) {
+        for (char c : s.toCharArray()) {
+            writeShort((short) c);
+        }
+
+        writeShort((short) 0);
     }
 
     public byte readByte() {
@@ -56,9 +81,38 @@ public class ByteBuffer {
         return java.nio.ByteBuffer.wrap(readBytes(4)).getInt();
     }
 
-    public String readString() {
-        int length = readInteger();
-        return new String(readBytes(length));
+    public short readShort() {
+        return java.nio.ByteBuffer.wrap(readBytes(2)).getShort();
+    }
+
+    public double readDouble() {
+        return java.nio.ByteBuffer.wrap(readBytes(8)).getDouble();
+    }
+
+    public float readFloat() {
+        return java.nio.ByteBuffer.wrap(readBytes(4)).getFloat();
+    }
+
+    public long readLong() {
+        return java.nio.ByteBuffer.wrap(readBytes(8)).getLong();
+    }
+
+    public String readStringByte() {
+        byte c;
+        String str = "";
+        while ((c = readByte()) != 0) {
+            str += (char) c;
+        }
+        return str;
+    }
+
+    public String readStringShort() {
+        short c;
+        String str = "";
+        while ((c = readShort()) != 0) {
+            str += (char) c;
+        }
+        return str;
     }
 
     public void resetIndex() {
