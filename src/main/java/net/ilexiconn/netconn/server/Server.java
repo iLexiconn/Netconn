@@ -109,7 +109,12 @@ public class Server implements INetworkManager {
                 }
             }
         }
+
+        clientConnecting = true;
+
         this.aliveClients.clear();
+
+        clientConnecting = false;
     }
 
     public void waitForConnection() throws IOException {

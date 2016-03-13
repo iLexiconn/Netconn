@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class NetconnRegistry {
-    public static final String VERSION = "0.1.0";
+    public static final String VERSION = "0.1.1";
 
     private static Map<Integer, Class<? extends IPacket>> packetHandlerMap = new HashMap<Integer, Class<? extends IPacket>>();
 
