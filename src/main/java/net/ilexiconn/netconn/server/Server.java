@@ -90,10 +90,14 @@ public class Server implements INetworkManager {
     }
 
     public void disconnectClient(Socket client) {
+        clientConnecting = true;
+
         for (IServerListener listener : this.serverListenerList) {
             listener.onClientDisconnected(this, client);
         }
         this.aliveClients.remove(client);
+
+        clientConnecting = false;
     }
 
     public void stop() {
