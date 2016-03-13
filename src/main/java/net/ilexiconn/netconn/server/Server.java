@@ -121,13 +121,13 @@ public class Server implements INetworkManager {
                 public void run() {
                     while (getAliveClients().contains(finalClient)) {
                         try {
-                            InputStream in = client.getInputStream();
+                            InputStream in = finalClient.getInputStream();
                             if (in.available() != 0) {
                                 byte[] data = IOUtils.toByteArray(in);
                                 IPacket packet = NetconnRegistry.constructFromID(NetconnRegistry.getIDFromBytes(data));
                                 if (packet != null) {
                                     packet.decode(new ByteBuffer(data));
-                                    packet.handleServer(client, Server.this);
+                                    packet.handleServer(finalClient, Server.this);
                                 }
                             }
                         } catch (IOException e) {
