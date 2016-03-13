@@ -40,7 +40,7 @@ public class ChatClient {
             Thread clientListen = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    while (client.isConnected()) {
+                    while (client.isRunning()) {
                         client.listen();
                     }
                 }

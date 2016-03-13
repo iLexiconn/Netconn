@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Client implements INetworkManager {
+    private boolean running;
     private boolean connected;
     private String host;
     private int port;
@@ -23,12 +24,12 @@ public class Client implements INetworkManager {
         this.port = port;
         this.server = new Socket(host, port);
         this.clientListenerList = new ArrayList<IClientListener>();
-        this.connected = true;
+        this.running = true;
 
         Thread updateThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                while (connected) {
+                while (running) {
                     Client.this.update();
                 }
             }
@@ -53,6 +54,7 @@ public class Client implements INetworkManager {
     }
 
     public void disconnect() {
+        this.running = false;
         this.connected = false;
         for (IClientListener listener : this.clientListenerList) {
             listener.onDisconnected(this);
@@ -70,6 +72,12 @@ public class Client implements INetworkManager {
             InputStream in = server.getInputStream();
             byte[] data = IOUtils.toByteArray(in);
             IPacket packet = NetconnRegistry.constructFromID(NetconnRegistry.getIDFromBytes(data));
+            if (!connected && running) {
+                connected = true;
+                for (IClientListener listener : this.clientListenerList) {
+                    listener.onConnected(this, server);
+                }
+            }
             if (packet != null) {
                 packet.decode(new ByteBuffer(data));
                 packet.handleClient(server, this);
@@ -105,7 +113,7 @@ public class Client implements INetworkManager {
 
     }
 
-    public boolean isConnected() {
-        return connected;
+    public boolean isRunning() {
+        return running;
     }
 }
