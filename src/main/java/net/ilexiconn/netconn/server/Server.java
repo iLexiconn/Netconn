@@ -76,11 +76,11 @@ public class Server implements INetworkManager {
     }
 
     public List<Socket> getAliveClients() {
-        return new ArrayList<Socket>(aliveClients);
+        return new ArrayList<>(aliveClients);
     }
 
     public List<Socket> getDeadClients() {
-        return new ArrayList<Socket>(deadClients);
+        return new ArrayList<>(deadClients);
     }
 
     public void disconnectClient(Socket client) {
