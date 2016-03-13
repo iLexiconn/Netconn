@@ -76,6 +76,8 @@ public class Client implements INetworkManager {
             }
         } catch (IOException e) {
             e.printStackTrace();
+            disconnect();
+            System.exit(1);
         }
     }
 
@@ -102,5 +104,9 @@ public class Client implements INetworkManager {
     @Override
     public void sendPacketToAllClients(IPacket packet) {
 
+    }
+
+    public boolean isConnected() {
+        return connected;
     }
 }

@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -19,7 +20,6 @@ public class Server implements INetworkManager {
     private ServerSocket serverSocket;
     private volatile List<Socket> aliveClients = new ArrayList<Socket>();
     private volatile List<Socket> deadClients = new ArrayList<Socket>();
-    private volatile boolean clientConnecting;
     private List<IServerListener> serverListenerList;
     private boolean running;
 
@@ -52,20 +52,14 @@ public class Server implements INetworkManager {
                     timer.purge();
                 }
 
-                while (clientConnecting) {
-                    ;
-                }
-
                 if (!deadClients.isEmpty()) {
-                    clientConnecting = true;
                     for (Socket client : deadClients) {
                         disconnectClient(client);
                     }
                     deadClients.clear();
-                    clientConnecting = false;
                 }
 
-                for (Socket client : aliveClients) {
+                for (Socket client : new ArrayList<Socket>(aliveClients)) {
                     deadClients.add(client);
                     sendPacketToClient(new PacketKeepAlive(), client);
                 }
@@ -90,14 +84,14 @@ public class Server implements INetworkManager {
     }
 
     public void disconnectClient(Socket client) {
-        clientConnecting = true;
-
         for (IServerListener listener : this.serverListenerList) {
             listener.onClientDisconnected(this, client);
         }
+        try {
+            client.close();
+        } catch (Exception e) {
+        }
         this.aliveClients.remove(client);
-
-        clientConnecting = false;
     }
 
     public void stop() {
@@ -110,17 +104,11 @@ public class Server implements INetworkManager {
             }
         }
 
-        clientConnecting = true;
-
         this.aliveClients.clear();
-
-        clientConnecting = false;
     }
 
     public void waitForConnection() throws IOException {
         Socket client = this.serverSocket.accept();
-
-        clientConnecting = true;
 
         if (!aliveClients.contains(client)) {
             for (IServerListener listener : this.serverListenerList) {
@@ -128,8 +116,6 @@ public class Server implements INetworkManager {
             }
             aliveClients.add(client);
         }
-
-        clientConnecting = false;
     }
 
     @Override
@@ -143,13 +129,15 @@ public class Server implements INetworkManager {
             System.arraycopy(idBytes, 0, bytes, 0, idBytes.length);
             out.write(bytes);
         } catch (IOException e) {
-            System.err.println("Failed to send packet with ID " + NetconnRegistry.getIDFromPacket(packet.getClass()));
+            deadClients.remove(client);
+            aliveClients.remove(client);
+            disconnectClient(client);
         }
     }
 
     @Override
     public void sendPacketToAllClients(IPacket packet) {
-        for (Socket client : aliveClients) {
+        for (Socket client : new ArrayList<Socket>(aliveClients)) {
             sendPacketToClient(packet, client);
         }
     }
@@ -165,11 +153,7 @@ public class Server implements INetworkManager {
     }
 
     public void listen() {
-        while (clientConnecting) {
-            ;
-        }
-
-        for (Socket client : this.aliveClients) {
+        for (Socket client : new ArrayList<Socket>(this.aliveClients)) {
             if (client != null) {
                 try {
                     InputStream in = client.getInputStream();
@@ -182,9 +166,12 @@ public class Server implements INetworkManager {
                         }
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
                 }
             }
         }
+    }
+
+    public boolean isRunning() {
+        return running;
     }
 }

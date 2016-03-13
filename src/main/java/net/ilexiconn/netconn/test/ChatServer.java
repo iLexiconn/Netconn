@@ -34,7 +34,7 @@ public class ChatServer {
             Thread serverListen = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    while (true) {
+                    while (server.isRunning()) {
                         server.listen();
                     }
                 }
@@ -45,10 +45,12 @@ public class ChatServer {
 
             new Thread() {
                 public void run() {
-                    try {
-                        server.waitForConnection();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    while (server.isRunning()) {
+                        try {
+                            server.waitForConnection();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }.start();
