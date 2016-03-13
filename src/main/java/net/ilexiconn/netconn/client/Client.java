@@ -77,7 +77,6 @@ public class Client implements INetworkManager {
         } catch (IOException e) {
             e.printStackTrace();
             disconnect();
-            System.exit(1);
         }
     }
 
