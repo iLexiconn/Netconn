@@ -53,13 +53,13 @@ public class Server implements INetworkManager {
                 }
 
                 if (!deadClients.isEmpty()) {
-                    for (Socket client : getDeadClients()) {
+                    for (Socket client : deadClients) {
                         disconnectClient(client);
                     }
                     deadClients.clear();
                 }
 
-                for (Socket client : getAliveClients()) {
+                for (Socket client : new ArrayList<Socket>(aliveClients)) {
                     deadClients.add(client);
                     sendPacketToClient(new PacketKeepAlive(), client);
                 }
@@ -76,11 +76,11 @@ public class Server implements INetworkManager {
     }
 
     public List<Socket> getAliveClients() {
-        return new ArrayList<>(aliveClients);
+        return aliveClients;
     }
 
     public List<Socket> getDeadClients() {
-        return new ArrayList<>(deadClients);
+        return deadClients;
     }
 
     public void disconnectClient(Socket client) {
@@ -96,13 +96,14 @@ public class Server implements INetworkManager {
 
     public void stop() {
         running = false;
-        for (Socket client : getAliveClients()) {
+        for (Socket client : this.aliveClients) {
             if (client != null) {
                 for (IServerListener listener : this.serverListenerList) {
                     listener.onClientDisconnected(this, client);
                 }
             }
         }
+
         this.aliveClients.clear();
     }
 
@@ -136,7 +137,7 @@ public class Server implements INetworkManager {
 
     @Override
     public void sendPacketToAllClients(IPacket packet) {
-        for (Socket client : getAliveClients()) {
+        for (Socket client : new ArrayList<Socket>(aliveClients)) {
             sendPacketToClient(packet, client);
         }
     }
@@ -152,7 +153,7 @@ public class Server implements INetworkManager {
     }
 
     public void listen() {
-        for (Socket client : getAliveClients()) {
+        for (Socket client : new ArrayList<Socket>(this.aliveClients)) {
             if (client != null) {
                 try {
                     InputStream in = client.getInputStream();
