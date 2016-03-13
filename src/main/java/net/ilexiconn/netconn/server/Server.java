@@ -115,6 +115,26 @@ public class Server implements INetworkManager {
                 listener.onClientConnected(this, client);
             }
             aliveClients.add(client);
+            final Socket finalClient = client;
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (getAliveClients().contains(finalClient)) {
+                        try {
+                            InputStream in = client.getInputStream();
+                            if (in.available() != 0) {
+                                byte[] data = IOUtils.toByteArray(in);
+                                IPacket packet = NetconnRegistry.constructFromID(NetconnRegistry.getIDFromBytes(data));
+                                if (packet != null) {
+                                    packet.decode(new ByteBuffer(data));
+                                    packet.handleServer(client, Server.this);
+                                }
+                            }
+                        } catch (IOException e) {
+                        }
+                    }
+                }
+            }).start();
         }
     }
 
@@ -153,22 +173,6 @@ public class Server implements INetworkManager {
     }
 
     public void listen() {
-        for (Socket client : new ArrayList<Socket>(this.aliveClients)) {
-            if (client != null) {
-                try {
-                    InputStream in = client.getInputStream();
-                    if (in.available() != 0) {
-                        byte[] data = IOUtils.toByteArray(in);
-                        IPacket packet = NetconnRegistry.constructFromID(NetconnRegistry.getIDFromBytes(data));
-                        if (packet != null) {
-                            packet.decode(new ByteBuffer(data));
-                            packet.handleServer(client, Server.this);
-                        }
-                    }
-                } catch (IOException e) {
-                }
-            }
-        }
     }
 
     public boolean isRunning() {

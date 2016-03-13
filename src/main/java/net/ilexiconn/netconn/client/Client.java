@@ -56,6 +56,11 @@ public class Client implements INetworkManager {
     public void disconnect() {
         this.running = false;
         this.connected = false;
+        try {
+            this.server.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         for (IClientListener listener : this.clientListenerList) {
             listener.onDisconnected(this);
         }
