@@ -123,7 +123,6 @@ public class Client implements INetworkManager {
 
     public void setPingTime(int pingTime) {
         this.pingTime = pingTime;
-        System.out.println(pingTime);
     }
 
     public int getPingTime() {
