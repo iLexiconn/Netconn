@@ -189,7 +189,7 @@ public class Server implements INetworkManager {
     }
 
     public int getPingTime(Socket client) {
-        return pingTimes.get(client);
+        return pingTimes.containsKey(client) ? pingTimes.get(client) : 0;
     }
 
     public boolean isRunning() {
