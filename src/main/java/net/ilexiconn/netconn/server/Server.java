@@ -180,10 +180,12 @@ public class Server implements INetworkManager {
     }
 
     public void receiveKeepAlive(Socket client) {
-        int ping = (int) (System.currentTimeMillis() - keepAliveSendTimes.get(client));
+        if (keepAliveSendTimes.containsKey(client)) {
+            int ping = (int) (System.currentTimeMillis() - keepAliveSendTimes.get(client));
+            pingTimes.put(client, ping);
+            sendPacketToClient(new PacketPing(ping), client);
+        }
         deadClients.remove(client);
-        pingTimes.put(client, ping);
-        sendPacketToClient(new PacketPing(ping), client);
     }
 
     public int getPingTime(Socket client) {
