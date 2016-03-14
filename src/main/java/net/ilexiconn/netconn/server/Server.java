@@ -3,17 +3,14 @@ package net.ilexiconn.netconn.server;
 import net.ilexiconn.netconn.*;
 import net.ilexiconn.netconn.packet.PacketDisconnect;
 import net.ilexiconn.netconn.packet.PacketKeepAlive;
+import net.ilexiconn.netconn.packet.PacketPing;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 public class Server implements INetworkManager {
     private int port;
@@ -22,6 +19,9 @@ public class Server implements INetworkManager {
     private volatile List<Socket> deadClients = new ArrayList<Socket>();
     private List<IServerListener> serverListenerList;
     private boolean running;
+
+    private Map<Socket, Long> keepAliveSendTimes = new HashMap<Socket, Long>();
+    private Map<Socket, Integer> pingTimes = new HashMap<Socket, Integer>();
 
     public Server(int port) throws IOException {
         this.port = port;
@@ -40,6 +40,7 @@ public class Server implements INetworkManager {
 
         NetconnRegistry.registerPacket(-1, PacketKeepAlive.class);
         NetconnRegistry.registerPacket(-2, PacketDisconnect.class);
+        NetconnRegistry.registerPacket(-3, PacketPing.class);
 
         updateThread.start();
 
@@ -59,9 +60,11 @@ public class Server implements INetworkManager {
                     deadClients.clear();
                 }
 
+                keepAliveSendTimes.clear();
                 for (Socket client : new ArrayList<Socket>(aliveClients)) {
                     deadClients.add(client);
                     sendPacketToClient(new PacketKeepAlive(), client);
+                    keepAliveSendTimes.put(client, System.currentTimeMillis());
                 }
             }
         }, 5000, 5000);
@@ -92,6 +95,7 @@ public class Server implements INetworkManager {
         } catch (Exception e) {
         }
         this.aliveClients.remove(client);
+        this.pingTimes.remove(client);
     }
 
     public void stop() {
@@ -105,6 +109,7 @@ public class Server implements INetworkManager {
         }
 
         this.aliveClients.clear();
+        this.pingTimes.clear();
     }
 
     public void waitForConnection() throws IOException {
@@ -119,8 +124,8 @@ public class Server implements INetworkManager {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    while (getAliveClients().contains(finalClient)) {
-                        try {
+                    try {
+                        while (getAliveClients().contains(finalClient)) {
                             InputStream in = finalClient.getInputStream();
                             if (in.available() != 0) {
                                 byte[] data = IOUtils.toByteArray(in);
@@ -130,8 +135,8 @@ public class Server implements INetworkManager {
                                     packet.handleServer(finalClient, Server.this);
                                 }
                             }
-                        } catch (IOException e) {
                         }
+                    } catch (IOException e) {
                     }
                 }
             }).start();
@@ -150,7 +155,6 @@ public class Server implements INetworkManager {
             out.write(bytes);
         } catch (IOException e) {
             deadClients.remove(client);
-            aliveClients.remove(client);
             disconnectClient(client);
         }
     }
@@ -173,6 +177,17 @@ public class Server implements INetworkManager {
     }
 
     public void listen() {
+    }
+
+    public void receiveKeepAlive(Socket client) {
+        int ping = (int) (System.currentTimeMillis() - keepAliveSendTimes.get(client));
+        deadClients.remove(client);
+        pingTimes.put(client, ping);
+        sendPacketToClient(new PacketPing(ping), client);
+    }
+
+    public int getPingTime(Socket client) {
+        return pingTimes.get(client);
     }
 
     public boolean isRunning() {

@@ -20,7 +20,7 @@ public class PacketKeepAlive implements IPacket {
 
     @Override
     public void handleServer(Socket sender, INetworkManager networkManager) {
-        ((Server) networkManager).getDeadClients().remove(sender);
+        ((Server) networkManager).receiveKeepAlive(sender);
     }
 
     @Override

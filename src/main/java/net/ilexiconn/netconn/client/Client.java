@@ -3,6 +3,7 @@ package net.ilexiconn.netconn.client;
 import net.ilexiconn.netconn.*;
 import net.ilexiconn.netconn.packet.PacketDisconnect;
 import net.ilexiconn.netconn.packet.PacketKeepAlive;
+import net.ilexiconn.netconn.packet.PacketPing;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,6 +19,7 @@ public class Client implements INetworkManager {
     private int port;
     private Socket server;
     private List<IClientListener> clientListenerList;
+    private int pingTime;
 
     public Client(String host, int port) throws IOException {
         this.host = host;
@@ -39,6 +41,7 @@ public class Client implements INetworkManager {
 
         NetconnRegistry.registerPacket(-1, PacketKeepAlive.class);
         NetconnRegistry.registerPacket(-2, PacketDisconnect.class);
+        NetconnRegistry.registerPacket(-3, PacketPing.class);
     }
 
     public void addListener(IClientListener listener) {
@@ -116,6 +119,15 @@ public class Client implements INetworkManager {
     @Override
     public void sendPacketToAllClients(IPacket packet) {
 
+    }
+
+    public void setPingTime(int pingTime) {
+        this.pingTime = pingTime;
+        System.out.println(pingTime);
+    }
+
+    public int getPingTime() {
+        return pingTime;
     }
 
     public boolean isRunning() {
